@@ -1,7 +1,6 @@
 from flask import Flask, request, send_from_directory
 from datetime import datetime
 from werkzeug.exceptions import BadRequestKeyError
-from pathvalidate import ValidationError, validate_filename
 from markupsafe import escape
 import os
 import sys

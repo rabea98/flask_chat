@@ -42,9 +42,12 @@ def postchatmessage(room):
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         username = escape(request.form["username"])
         msg = escape(request.form["msg"])
-        with open(os.path.join(CHAT_LOGS_DIR, f"{room}.txt"), 'a') as roomfile:
-            roomfile.write("[%s] %s: %s\n"%(date, username, msg))
-            return "success"
+        if msg != "" and username != "":
+            with open(os.path.join(CHAT_LOGS_DIR, f"{room}.txt"), 'a') as roomfile:
+                roomfile.write("[%s] %s: %s\n"%(date, username, msg))
+        else:
+            status = 400
+            message = "empty name or message"
     except IOError:
         status = 500
         message = "error opening room file for %s."%room

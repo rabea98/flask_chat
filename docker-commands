@@ -4,13 +4,18 @@ docker network create chat-network
 # Build MySQL image
 docker build -t chat-mysql -f Dockerfile.mysql .
 
-# Run MySQL container
+# Run MySQL with native password authentication
 docker run -d \
     --name mysqlhost \
     --network chat-network \
+    -e MYSQL_ROOT_PASSWORD=mysqlpassword \
+    -e MYSQL_USER=mysqlusername \
+    -e MYSQL_PASSWORD=mysqlpassword \
+    -e MYSQL_DATABASE=database \
     -p 3306:3306 \
-    chat-mysql
-
+    mysql:8.0 \
+    --default-authentication-plugin=mysql_native_password
+	
 # Build Flask app image
 docker build -t chat-app .
 
@@ -23,6 +28,22 @@ docker run -d \
     --network chat-network \
     -p 5000:5000 \
     chat-app
+	
+	
+# Connect to MySQL
+docker exec -it mysqlhost mysql -umysqlusername -pmysqlpassword database
+
+#Once in MySQL prompt, create the table:
+CREATE TABLE chat_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    date DATETIME NOT NULL,
+    room VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL
+);
+
+#Exit MySQL and restart your Flask app:
+docker restart chat-app
 
 # Verify containers are running
 docker ps

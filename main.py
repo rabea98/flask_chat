@@ -36,7 +36,7 @@ def get_chat(room):
 @app.route('/api/chat/<room>', methods=['POST'])
 def postchatmessage(room):
     status = 200
-    messge = "success"
+    message = "success"
     try:
         validate_filename(room)
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -1,0 +1,32 @@
+# Create network for containers to communicate
+docker network create chat-network
+
+# Build MySQL image
+docker build -t chat-mysql -f Dockerfile.mysql .
+
+# Run MySQL container
+docker run -d \
+    --name mysqlhost \
+    --network chat-network \
+    -p 3306:3306 \
+    chat-mysql
+
+# Build Flask app image
+docker build -t chat-app .
+
+# Wait a few seconds for MySQL to initialize
+sleep 10
+
+# Run Flask app container
+docker run -d \
+    --name chat-app \
+    --network chat-network \
+    -p 5000:5000 \
+    chat-app
+
+# Verify containers are running
+docker ps
+
+# View logs if needed
+docker logs mysqlhost
+docker logs chat-app

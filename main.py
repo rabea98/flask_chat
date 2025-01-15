@@ -1,6 +1,10 @@
 from flask import Flask, request, send_from_directory
 from datetime import datetime
+from werkzeug.exceptions import BadRequestKeyError
+from pathvalidate import ValidationError, validate_filename
+from markupsafe import escape
 import os
+import sys
 
 app = Flask(__name__)
 
@@ -27,6 +31,29 @@ def get_chat(room):
             return f.read()
     except FileNotFoundError:
         return ""
-
+    
+# Implemented by Ariel Fellous
+@app.route('/api/chat/<room>', methods=['POST'])
+def postchatmessage(room):
+    status = 200
+    messge = "success"
+    try:
+        validate_filename(room)
+        date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        username = escape(request.form["username"])
+        msg = escape(request.form["msg"])
+        with open(os.path.join(CHAT_LOGS_DIR, f"{room}.txt"), 'a') as roomfile:
+            roomfile.write("[%s] %s: %s\n"%(date, username, msg))
+            return "success"
+    except IOError:
+        status = 500
+        message = "error opening room file for %s."%room
+    except BadRequestKeyError:
+        status = 400
+        message = "missing form fields"
+    except ValidationError:
+        status = 400
+        message = "invalid room name"
+    return message, status
 if __name__ == '__main__':
     app.run(debug=True)
